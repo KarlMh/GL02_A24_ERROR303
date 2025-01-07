@@ -32,8 +32,8 @@ const rl = readline.createInterface({
  * @returns {void} Pas de valeur de retour
  */
 function displayMainMenu() {
-    console.log("\nBienvenue dans l'Outil de Gestion et Suivi d'Occupation des Salles de Cours :");
-    console.log('Menu Principal');
+    console.log("\n============= Main Menu =================")
+    console.log("Bienvenue dans l'Outil de Gestion et Suivi d'Occupation des Salles de Cours :\n");
     console.log('Choisissez une option :');
     console.log('1 - Faire une recherche');
     console.log("2 - Visuel taux d'occupation de chaque salle"); //SPEC 9 
@@ -41,6 +41,7 @@ function displayMainMenu() {
     console.log('4 - Vérifier le non-chevauchement'); // SPEC 7
     console.log("5 - Classement des salles en fonction de leur capacité d'accueil"); //SPEC 8
     console.log('0 - Quitter');
+    console.log('========================================\n');
 }
 
 /**
@@ -50,13 +51,14 @@ function displayMainMenu() {
  * @returns {void} Pas de valeur de retour.
  */
 function displaySearchMenu() {
-    console.log('\nMenu de recherche');
-    console.log('Choisissez une option de recherche :');
+    console.log('\n============= Menu de Recherche =============');
+    console.log('Choisissez une option de recherche :\n');
     console.log('1 - Recherche des salles assignées à un cours'); //SPEC 1
     console.log("2 - Recherche de la capacité maximale d'une salle"); //SPEC 2
     console.log("3 - Recherche des disponibilités d'une salle"); //SPEC 3
     console.log('4 - Recherche des salles libres à un créneau'); //SPEC 4
     console.log('0 - Quitter');
+    console.log('=============================================\n');
 }
 
 // --------------------------------------------------------------
@@ -447,8 +449,8 @@ function RankingRoomCapacity(){
 function VisuelOccupationSalle() {
     console.log("\nVous avez choisi l'option 'Visuel taux d'occupation d'une salle'");
     console.log("Quel est la salle dont vous recherchez le taux d'occupation dans la semaine ?");
-    console.log("0 - Quitter");
     printRooms();
+    console.log("0 -> Quitter");
     rl.question('Votre choix : ', (choice) => {
         choice=choice.toUpperCase(); // Met en majuscule
         switch (choice) {
@@ -475,17 +477,26 @@ function VisuelOccupationSalle() {
  *
  * @returns {void} Cette fonction ne retourne rien 
  */
-function printRooms(){
+function printRooms() {
     const listSalles = [];
-    console.log("L'ensemble des salles disponibles est : ");
+    console.log("\nL'ensemble des salles disponibles est :");
+
+    // Collecter toutes les salles sans doublon
     for (const course of data) {
         for (const classEntry of course.classes) {
             if (!listSalles.includes(classEntry.room)) {
-                console.log("Salle " + classEntry.room)
                 listSalles.push(classEntry.room);
             }
         }
     }
+
+    // Affichage des salles dans un format compact, 5 salles par ligne
+    const sallesParLigne = 5;
+    for (let i = 0; i < listSalles.length; i += sallesParLigne) {
+        console.log(listSalles.slice(i, i + sallesParLigne).join(' | '));
+    }
+
+    console.log("\nTotal des salles : " + listSalles.length);
 }
 
 
