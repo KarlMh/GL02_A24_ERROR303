@@ -83,6 +83,38 @@
 //     });
 // }
 
+// Fonction pour trouver les créneaux libres pour un jour donné
+// NOTE : Cette fonction est nécessaire pour que SPEC 3 fonctionne correctement.
+// Pour l'utiliser, décommentez-la.
+/*
+function findFreeSlots(dayClasses) {
+    const sortedClasses = dayClasses
+        .map(classe => ({
+            start: timeToMinutes(classe.start),
+            end: timeToMinutes(classe.end)
+        }))
+        .sort((a, b) => a.start - b.start);
+
+    const dayStart = timeToMinutes('08:00');
+    const dayEnd = timeToMinutes('20:00');
+    let currentTime = dayStart;
+    const freeSlots = [];
+
+    sortedClasses.forEach(({ start, end }) => {
+        if (currentTime < start) {
+            freeSlots.push({ start: formatTime(currentTime), end: formatTime(start) });
+        }
+        currentTime = Math.max(currentTime, end);
+    });
+
+    if (currentTime < dayEnd) {
+        freeSlots.push({ start: formatTime(currentTime), end: formatTime(dayEnd) });
+    }
+
+    return freeSlots;
+}
+*/
+
 function findFreeSlotsByRoom(specificRoom) {
     specificRoom = specificRoom.toUpperCase();
 
