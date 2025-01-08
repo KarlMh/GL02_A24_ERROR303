@@ -1,50 +1,13 @@
-// Exportation des fonctions dont on a besoin en dehors de ce fichier
-module.exports={verifSalle, printedMaxCapacity, MaxCapacity};
 const DataMain = require('./main.js');
-data = DataMain.structuredData
+const data = DataMain.structuredData;
 
-// ------------------------------------------------------------
-// Fonction appelée depuis terminalcommande par la fonction RoomCapacity
-
-/**
- * Fonction qui affiche la capacité maximale d'une salle donnée
- * Exemple de donnée : "D105"
- *
- * @param {string} salle - La salle dont on veut afficher la capacité maximale.
- * @returns {void} Cette fonction ne retourne rien, mais affiche la capacité maximale de la salle donnée
- */
-function printedMaxCapacity(data, salle) {
-    salle=salle.toUpperCase(); // Met en majuscule
-    if (!verifSalle(data, salle)){
-        console.log("Erreur : la salle n'existe pas dans la base de données.");
-        return;
-    }
-    console.log(`La capacité maximale de la salle ${salle} est : ${MaxCapacity(data, salle)}`);
-}
-
-// ------------------------------------------------------------
-// Fonctions appelée plusieurs fois depuis les autres fichiers
-
-/**
- * Fonction qui renvoie vrai si la salle donnée existe dans la base de donnée, et faux sinon
- * Exemple de donnée : "D105"
- *
- * @param {string} salle - La salle dont on veut vérifier l'existence dans la base de données.
- * @returns {boolean} Vrai si la salle existe dans la base de données, faux sinon.
- */
+// Fonctions existantes
 function verifSalle(data, salle) {
     return data.some(module => 
         module.classes.some(classEntry => classEntry.room === salle)
     );
 }
 
-/**
- * Fonction qui renvoie la capacité maximale d'une salle donnée
- * Exemple de donnée : "D105" (on sait déjà que la salle existe dans la base de données)
- *
- * @param {string} salle - La salle dont on veut avoir la capacité maximale.
- * @returns {int} La capacité maximale de la salle.
- */
 function MaxCapacity(data, salle){
     let maxCapacite = 0;
     for (const course of data) {
@@ -56,3 +19,48 @@ function MaxCapacity(data, salle){
     }
     return maxCapacite;
 }
+
+function printedMaxCapacity(data, salle) {
+    salle = salle.toUpperCase();
+    if (!verifSalle(data, salle)){
+        console.log("Erreur : la salle n'existe pas dans la base de données.");
+        return;
+    }
+    console.log(`La capacité maximale de la salle ${salle} est : ${MaxCapacity(data, salle)}`);
+}
+
+// Nouvelle fonction pour le filtrage par capacité
+function getRoomsByMinCapacity(minCapacity) {
+    if (minCapacity < 0) {
+        console.log("Erreur : La capacité minimale doit être un nombre positif");
+        return [];
+    }
+
+    // Map pour stocker la capacité max de chaque salle
+    const roomCapacities = new Map();
+
+    // Parcours des données pour trouver la capacité maximale de chaque salle
+    for (const course of data) {
+        for (const classEntry of course.classes) {
+            const currentMax = roomCapacities.get(classEntry.room) || 0;
+            if (classEntry.capacity > currentMax) {
+                roomCapacities.set(classEntry.room, classEntry.capacity);
+            }
+        }
+    }
+
+    // Filtrer et trier les salles
+    const filteredRooms = Array.from(roomCapacities.entries())
+        .filter(([_, capacity]) => capacity >= minCapacity)
+        .sort((a, b) => a[1] - b[1])
+        .map(([room, capacity]) => ({ room, capacity }));
+
+    return filteredRooms;
+}
+
+module.exports = {
+    verifSalle,
+    printedMaxCapacity,
+    MaxCapacity,
+    getRoomsByMinCapacity
+};
