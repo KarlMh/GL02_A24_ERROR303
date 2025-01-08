@@ -51,14 +51,14 @@ function displayMainMenu() {
  * @returns {void} Pas de valeur de retour.
  */
 function displaySearchMenu() {
-    console.log('\n============= Menu de Recherche =============');
-    console.log('Choisissez une option de recherche :\n');
-    console.log('1 - Recherche des salles assignées à un cours'); //SPEC 1
-    console.log("2 - Recherche de la capacité maximale d'une salle"); //SPEC 2
-    console.log("3 - Recherche des disponibilités d'une salle"); //SPEC 3
-    console.log('4 - Recherche des salles libres à un créneau'); //SPEC 4
-    console.log('0 - Quitter');
-    console.log('=============================================\n');
+    console.log('\nMenu de recherche');
+    console.log('Choisissez une option de recherche :');
+    console.log('1 - Recherche des salles assignées à un cours');
+    console.log("2 - Recherche de la capacité maximale d'une salle");
+    console.log("3 - Recherche des disponibilités d'une salle");
+    console.log('4 - Recherche des salles libres à un créneau');
+    console.log('5 - Recherche des salles par capacité minimale');
+    console.log('0 - Retour au menu principal');
 }
 
 // --------------------------------------------------------------
@@ -99,6 +99,7 @@ function handleMainMenu(choice) {
     }
 }
 
+
 /**
  * Gère la sélection du menu recherche en fonction du choix de l'utilisateur.
  *
@@ -120,11 +121,14 @@ function handleSearchMenu(choice) {
         case '4':
             CreneauLibreSalle(); //SPEC 4
             return;
+        case '5':
+            SearchRoomsByMinCapacity(); //SPEC 2 - nouvelle fonction
+            return;
         case '0':
-            askMainMenu(); // Revenir au menu principal
+            askMainMenu();
             return;
         default:
-            console.log('Option invalide. Veuillez choisir un nombre entre 0 et 4.');
+            console.log('Option invalide. Veuillez choisir un nombre entre 0 et 5.');
             askSearchMenu();
     }
 }
@@ -219,6 +223,36 @@ function RoomCapacity(){
     })
 }
 
+function SearchRoomsByMinCapacity() {
+    console.log("\nRecherche des salles par capacité minimale");
+    console.log("0 - Retour au menu précédent");
+    
+    rl.question('Entrez la capacité minimale recherchée : ', (input) => {
+        if (input === '0') {
+            askSearchMenu();
+            return;
+        }
+
+        const capacity = parseInt(input);
+        if (isNaN(capacity)) {
+            console.log("Erreur : Veuillez entrer un nombre valide");
+            SearchRoomsByMinCapacity();
+            return;
+        }
+
+        const filteredRooms = SPEC_2.getRoomsByMinCapacity(capacity);
+        if (filteredRooms.length > 0) {
+            console.log(`\nSalles disponibles avec une capacité d'au moins ${capacity} personnes :`);
+            console.log("Salle | Capacité");
+            console.log("---------------");
+            filteredRooms.forEach(room => {
+                console.log(`${room.room.padEnd(6)} | ${room.capacity} personnes`);
+            });
+        }
+        waitForMenu();
+    });
+}
+
 // SPEC 3 - Affiche les horaires libres pour une salle
 /** 
  * Demande une salle à l'utilisateur, puis appelle la fonction findFreeSlotsByRoom de la SPEC-3 
@@ -307,39 +341,30 @@ function generatePersonalSchedule() {
  * @returns {void} Cette fonction n'a pas de valeur de retour. Elle interagit avec l'utilisateur pour sélectionner des cours.
  */
 function askForCourses(dict_courses_selected) {
-    function ask() {
-        rl.question("Donnez le nom d'un cours ('0' pour quitter, '1' pour terminer la sélection): ", (input) => {
-            switch (input) {
-                case '0':
-                    console.log("Vous avez choisi de quitter");
-                    askMainMenu();
-                    return;
-                case '1':
-                    if (Object.keys(dict_courses_selected).length > 0) {
-                        console.log('Fin du choix des matières.');
-                        SPEC_6.generateICalendar(dict_courses_selected);
-                        waitForMenu();
-                        return
-                    } else {
-                        console.log('Pas de cours choisis, veuillez réessayer');
-                        askForCourses(dict_courses_selected);
-                    }
-                    return;
-                default:
-                    if (SPEC_6.findCourse(input)) {
-                        console.log(`Cours ajouté: ${input}`);
-                        dict_courses_selected[input]= [];
-                        dict_courses_selected = askForGroups(input, dict_courses_selected);
-                    } else {
-                        console.log('Cours pas trouvé. Veuillez réessayer.');
-                    }
-
-                    ask(); //répéter pour le prochain cours
-            }
-        });
-    };
-
-    ask(); // Start the loop
+    console.log("\nCours déjà sélectionnés:", Object.keys(dict_courses_selected).join(", ") || "Aucun");
+    rl.question("Donnez le nom d'un cours ('0' pour quitter, '1' pour terminer la sélection): ", (courseCode) => {
+        switch (courseCode) {
+            case '0':
+                console.log("Vous avez choisi de quitter");
+                askMainMenu();
+                return;
+            case '1':
+                if (Object.keys(dict_courses_selected).length > 0) {
+                    showSummaryAndGenerate(dict_courses_selected);
+                } else {
+                    console.log('Aucun cours sélectionné. Veuillez choisir au moins un cours.');
+                    askForCourses(dict_courses_selected);
+                }
+                return;
+            default:
+                if (SPEC_6.findCourse(courseCode)) {
+                    askForGroups(courseCode, dict_courses_selected);
+                } else {
+                    console.log('Cours non trouvé. Veuillez réessayer.');
+                    askForCourses(dict_courses_selected);
+                }
+        }
+    });
 }
 
 /**
@@ -352,29 +377,40 @@ function askForCourses(dict_courses_selected) {
  * @param {} dict_courses_selected - Liste des cours pour lesquels l'utilisateur doit choisir un groupe.
  * @returns {} Cette fonction ne retourne rien, mais lance un processus interactif pour sélectionner les groupes et générer le fichier iCalendar.
  */
-function askForGroups(course, dict_courses_selected) {
-    SPEC_6.PrintGroupsAvailable(course);
-    rl.question(`Donnez le nom de vos groupes de cours pour ${course} ('0' pour quitter, '1' pour terminer la sélection): `, (input) => {
-        switch (input) {
+function askForGroups(courseCode, dict_courses_selected) {
+    SPEC_6.PrintGroupsAvailable(courseCode);
+    console.log("\nGroupes déjà sélectionnés pour", courseCode + ":", 
+        dict_courses_selected[courseCode]?.map(g => g.classes.group).join(", ") || "Aucun");
+    
+    rl.question(`Donnez le nom du groupe ('0' pour quitter, '1' pour retourner à la sélection des cours): `, (groupCode) => {
+        switch (groupCode) {
             case '0':
                 console.log("Vous avez choisi de quitter");
                 askMainMenu();
                 return;
             case '1':
-                if (dict_courses_selected[course]== []) {
-                    console.log('Pas de groupes choisis. Veuillez réessayer.');
-                } else {
-                    askForCourses(dict_courses_selected);
-                    return;
-                }
+                askForCourses(dict_courses_selected);
+                return;
             default:
-                if (SPEC_6.findGroup(course, input)) {
-                    console.log(`Groupe ajouté: ${input}`);
-                    dict_courses_selected[course].push(SPEC_6.findGroupModule(course, input));
-                    dict_courses_selected = askForGroups(course, dict_courses_selected);
+                if (SPEC_6.findGroup(courseCode, groupCode)) {
+                    const newModule = SPEC_6.findGroupModule(courseCode, groupCode);
+                    const conflict = SPEC_6.checkTimeConflict(dict_courses_selected, newModule);
+                    
+                    if (conflict.conflict) {
+                        console.log("\nImpossible d'ajouter ce groupe:", conflict.message);
+                        askForGroups(courseCode, dict_courses_selected);
+                        return;
+                    }
+
+                    if (!dict_courses_selected[courseCode]) {
+                        dict_courses_selected[courseCode] = [];
+                    }
+                    dict_courses_selected[courseCode].push(newModule);
+                    console.log(`Groupe ${groupCode} ajouté au cours ${courseCode}`);
+                    askForGroups(courseCode, dict_courses_selected);
                 } else {
-                    console.log('Groupe pas trouvé. Veuillez réessayer.');
-                    dict_courses_selected = askForGroups(course, dict_courses_selected);
+                    console.log('Groupe non trouvé. Veuillez réessayer.');
+                    askForGroups(courseCode, dict_courses_selected);
                 }
         }
     });
@@ -515,3 +551,5 @@ function waitForMenu(){
     }
     )
 }
+
+
