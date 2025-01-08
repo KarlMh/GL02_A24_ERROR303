@@ -59,12 +59,13 @@ Le programme traite des fichiers de type `.cru` contenant les informations des e
 
 1. Recherche de salles par cours
 2. Vérification de la capacité maximale des salles
-3. Recherche des disponibilités des salles
-4. Identification des salles libres à un créneau donné
-5. Génération d'un agenda iCalendar
-6. Vérification des chevauchements de cours
-7. Classement des salles par capacité
-8. Visualisation du taux d'occupation des salles
+3. Vérification des salles qui ont une capacité minimale donnée
+4. Recherche des disponibilités des salles
+5. Identification des salles libres à un créneau donné
+6. Génération d'un agenda iCalendar
+7. Vérification des chevauchements de cours
+8. Classement des salles par capacité
+9. Visualisation du taux d'occupation des salles
 
 ## Lancement de l'Application
 
@@ -125,3 +126,4 @@ npm test
 Anaëlle MELO (anaelle.melo@utt.fr)
 Icham LECORVAISIER (icham.lecorvaisier@utt.fr)
 Florent PERROUX (florent.perroux@utt.fr)
+Cheikh DIOP (cheikh.diop1@utt.fr)
