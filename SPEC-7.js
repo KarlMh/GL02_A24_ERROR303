@@ -1,4 +1,5 @@
 const SPEC_3 = require('./SPEC-3');
+
 /**
  * Fonction qui affiche les salles et les créneaux où il y a un chevauchement.
  *
@@ -18,28 +19,39 @@ function checkOverlaps(data) {
                 classesByRoom[classe.room] = [];
             }
 
-            // Vérifie les chevauchements avec les autres classes déjà enregistrées dans la même salle
-            for (let i = 0; i < classesByRoom[classe.room].length; i++) {
-                const existingClass = classesByRoom[classe.room][i];
+            // Liste des cours qui se chevauchent avec la classe actuelle
+            const overlappingClasses = classesByRoom[classe.room].filter(existingClass =>
+                classe.day === existingClass.day &&
+                areOverlapping(classe.start, classe.end, existingClass.start, existingClass.end)
+            );
 
-                // Vérifie si les classes ont le même jour et des horaires qui se chevauchent
-                if (
-                    classe.day === existingClass.day &&
-                    areOverlapping(classe.start, classe.end, existingClass.start, existingClass.end)
-                ) {
-                    console.log(`Chevauchement détecté dans la salle ${classe.room} (${existingClass.day} ${existingClass.start}-${existingClass.end})`);
-                    overlapsDetected = true;
-                }
+            if (overlappingClasses.length > 0) {
+                console.log(`Chevauchement détecté dans la salle ${classe.room} pour le créneau ${classe.day} ${classe.start}-${classe.end} :`);
+                
+                // Afficher tous les cours qui se chevauchent
+                overlappingClasses.forEach(overlappingClass => {
+                    console.log(`- ${overlappingClass.parentModule} (${overlappingClass.start}-${overlappingClass.end})`);
+                });
+
+                // Afficher aussi le cours actuel
+                console.log(`- ${course.module} (${classe.start}-${classe.end})`);
+
+                overlapsDetected = true;
             }
 
             // Ajoute la classe à la liste des classes dans la salle
-            classesByRoom[classe.room].push(classe);
+            classesByRoom[classe.room].push({
+                ...classe,
+                parentModule: course.module // Ajoute le module parent
+            });
         });
     });
-    if(!overlapsDetected){
+
+    if (!overlapsDetected) {
         console.log("Pas de chevauchement détecté.");
     }
 }
+
 /**
  * Fonction qui vérifie si deux horaires de cours se superposent.
  *
@@ -55,4 +67,4 @@ function areOverlapping(start1, end1, start2, end2) {
     return start1Time < end2Time && start2Time < end1Time;
 }
 
-module.exports = {checkOverlaps};
+module.exports = { checkOverlaps };
