@@ -10,6 +10,9 @@ const SPEC_3 = require('./SPEC-3');
  */
 function findFreeRooms(day, startTime, endTime) {
     // Collecte toutes les salles de tous les cours
+
+    day = day.toUpperCase();
+
     const allRooms = new Set();
     data.forEach(course => {
         course.classes.forEach(classe => {
