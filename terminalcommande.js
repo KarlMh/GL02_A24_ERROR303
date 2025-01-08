@@ -278,39 +278,82 @@ function DisponibiliteSalle() {
     });
 }
 
-//SPEC 4 - affiche les salles libres à un créneau donné
+// SPEC 4 - affiche les salles libres à un créneau donné
 /**
- * Demande un créneaux à l utilisateur, puis appelle la fonction findFreeRoom de la SPEC-4
- * afin d afficher les salles qui sont libres pendant ce créneau
+ * Demande un créneau à l'utilisateur, puis appelle la fonction findFreeRoom de la SPEC-4
+ * afin d'afficher les salles qui sont libres pendant ce créneau
  *
  * @returns {void} Cette fonction ne retourne rien
  */
 function CreneauLibreSalle() {
     console.log("\nRecherche des salles libres à un créneau");
     console.log("0 - Retour au menu précédent");
+
     rl.question('Entrez le jour (ex: L/MA/ME/J/V/S) : ', (jour) => {
         if (jour === '0') {
             askSearchMenu();
             return;
         }
-    
+        
+        const normalizedJour = jour.trim().toUpperCase();
+
+        if (!isValidDay(normalizedJour)) {
+            console.error("Erreur : Le jour doit être l'un des suivants : L, MA, ME, J, V, S. Veuillez réessayer.");
+            CreneauLibreSalle(); // Restart the process
+            return;
+        }
+
         rl.question("Entrez l'heure de début (HH:MM) : ", (heureDebut) => {
             if (heureDebut === '0') {
                 askSearchMenu();
                 return;
             }
-    
+
+            if (!isValidTimeFormat(heureDebut)) {
+                console.error("Erreur : L'heure de début doit respecter le format HH:MM. Veuillez réessayer.");
+                CreneauLibreSalle(); // Restart the process
+                return;
+            }
+
             rl.question("Entrez l'heure de fin (HH:MM) : ", (heureFin) => {
                 if (heureFin === '0') {
                     askSearchMenu();
                     return;
                 }
+
+                if (!isValidTimeFormat(heureFin)) {
+                    console.error("Erreur : L'heure de fin doit respecter le format HH:MM. Veuillez réessayer.");
+                    CreneauLibreSalle(); // Restart the process
+                    return;
+                }
+
                 SPEC_4.findFreeRooms(jour, heureDebut, heureFin);
-    
                 waitForMenu();
             });
         });
     });
+}
+
+/**
+ * Vérifie si une chaîne de caractères correspond au format HH:MM.
+ *
+ * @param {string} time - L'heure à vérifier
+ * @returns {boolean} Retourne true si le format est valide, sinon false
+ */
+function isValidTimeFormat(time) {
+    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    return timeRegex.test(time);
+}
+
+/**
+ * Vérifie si le jour est valide (L, MA, ME, J, V, S).
+ *
+ * @param {string} day - Le jour à vérifier
+ * @returns {boolean} Retourne true si le jour est valide, sinon false
+ */
+function isValidDay(day) {
+    const validDays = ['L', 'MA', 'ME', 'J', 'V', 'S'];
+    return validDays.includes(day);
 }
 
 //SPEC 5 non réalisé après discussion avec l'autre groupe
