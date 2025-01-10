@@ -51,7 +51,7 @@ function displayMainMenu() {
  * @returns {void} Pas de valeur de retour.
  */
 function displaySearchMenu() {
-    console.log('\nMenu de recherche');
+    console.log('============= Menu de Recherche =============');
     console.log('Choisissez une option de recherche :');
     console.log('1 - Recherche des salles assignées à un cours');
     console.log("2 - Recherche de la capacité maximale d'une salle");
@@ -59,6 +59,7 @@ function displaySearchMenu() {
     console.log('4 - Recherche des salles libres à un créneau');
     console.log('5 - Recherche des salles par capacité minimale');
     console.log('0 - Retour au menu principal');
+    console.log('=============================================\n');
 }
 
 // --------------------------------------------------------------
