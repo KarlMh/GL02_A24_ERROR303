@@ -127,7 +127,7 @@ function organizeTokens(tokens) {
                     currentCourse.push(token.split("=")[1]); // "H=MA" -> "MA"
                 } else if (/^S=(?:SPOR|[A-Z]{1,3}\d{1,3})?$/.test(token)) {
                     if (token == 'S=') {
-                        currentCourse.push('Aucune salle précisée')
+                        currentCourse.push('')
                     }else{
                         currentCourse.push(token.split("=")[1]); // "S=LAB102" -> "LAB102"
                     }
